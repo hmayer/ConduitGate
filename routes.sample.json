@@ -1,0 +1,51 @@
+{
+  "port": 8080,
+  "rules": [
+    {
+      "sourcePath": "/webhook-test",
+      "destinations": [
+        {
+          "protocol": "http",
+          "url": "http://localhost:8081/destination",
+          "headers": {
+            "Content-Type": "application/json",
+            "X-Custom-Header": "custom-value"
+          },
+          "username": "user",
+          "password": "password"
+        },
+        {
+          "protocol": "rabbitmq",
+          "url": "amqp://guest:guest@localhost:5672/",
+          "exchange": "webhook-exchange",
+          "routingKey": "webhook.events"
+        },
+        {
+          "protocol": "sns",
+          "region": "us-east-1",
+          "topicARN": "arn:aws:sns:us-east-1:0123456789:Chevron",
+          "accessKey": "YOUR_ACCESS_KEY_HERE",
+          "secretKey": "YOUR_SECRET_KEY_HERE"
+        },
+        {
+          "protocol": "sqs",
+          "region": "us-east-1",
+          "queueURL": "https://sqs.us-east-1.amazonaws.com/0123456789/ChevronQueue",
+          "accessKey": "YOUR_ACCESS_KEY_HERE",
+          "secretKey": "YOUR_SECRET_KEY_HERE"
+        }
+      ]
+    },
+    {
+      "sourcePath": "/webhook-test-2",
+      "destinations": [
+        {
+          "protocol": "rabbitmq",
+          "url": "amqp://guest:guest@localhost:5672/",
+          "exchange": "webhook-exchange",
+          "routingKey": "webhook.events"
+        }
+      ]
+    }
+  ]
+}
