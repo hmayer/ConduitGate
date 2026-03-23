@@ -1,42 +1,71 @@
-# Chevron Router
+# ConduitGate
 
-Chevron Router is a lightweight, high-performance webhook router and multiplexer written in Go. It allows you to receive incoming webhooks at a single endpoint and route them to multiple destinations based on the request path.
+ConduitGate is an HTTP event gateway that receives webhooks and routes them to queues, services, or other endpoints.
 
-## Objectives
+Receive once. Route anywhere.
 
-- **Webhook Multiplexing**: Forward a single incoming webhook to multiple backend services simultaneously.
-- **Protocol Translation**: Receive HTTP/HTTPS webhooks and forward them to various message brokers and cloud services like RabbitMQ, AWS SNS, and AWS SQS.
-- **Path-Based Routing**: Define routing rules based on the request URI path to direct traffic to the correct destinations.
-- **Asynchronous Forwarding**: Ensure fast response times for incoming requests by processing outgoing forwards in the background.
+It decouples webhook ingestion from processing, allowing you to scale and evolve your architecture without changing your integrations.
 
-## Configuration Guide
-
-The application is configured using a `routes.json` file located in the root directory. This file defines the listening port and the routing rules.
-
-### Basic Structure
+## Example
+A single webhook can be routed to multiple destinations:
 
 ```json
 {
   "port": 8080,
   "rules": [
     {
-      "sourcePath": "/path/to/webhook",
+      "sourcePath": "/stripe/payment_succeeded",
       "destinations": [
         {
+          "protocol": "sqs",
+          "region": "us-east-1",
+          "queueURL": "https://sqs.us-east-1.amazonaws.com/123456789/PaymentSucceededQueue"
+        },
+        {
           "protocol": "http",
-          "url": "http://example.com/endpoint"
+          "url": "http://internal-api/payments"
         }
       ]
     }
   ]
 }
 ```
+Send one webhook → route to multiple backends.
+
+## Why ConduitGate?
+
+Handling webhooks directly inside your application leads to:
+
+- Tight coupling between external services and internal logic
+- Hard-to-maintain integrations
+- Difficult scaling and retry strategies
+- Vendor lock-in to specific messaging systems
+
+ConduitGate solves this by acting as an ingestion layer that routes events to the right destination without embedding business logic.
+
+This keeps your system flexible, scalable, and easier to evolve over time.
+
+## Features
+
+- **Webhook Multiplexing**: Receive once, route to multiple destinations
+- **Protocol Translation**: HTTP → AMQP, SQS, SNS, or other HTTP endpoints
+- **Path-Based Routing**: Route events based on request paths
+- **Asynchronous Processing**: Immediate response with background delivery
+- **Decoupled Architecture**: Separate external integrations from internal systems
+
+## Configuration Guide
+
+## Configuration Guide
+
+ConduitGate is configured using a `routes.json` file located in the root directory.
+
+Each rule defines a source path and one or more destinations.
 
 ### Protocol-Specific Configuration
 
 Each destination in the `destinations` array must specify a `protocol` and relevant connection details.
 
-#### 1. HTTP / HTTPS
+#### 1. HTTP
 - `protocol`: `"http"` or `"https"`
 - `url`: The destination URL.
 - `headers` (optional): A map of custom headers to include in the request.
@@ -77,7 +106,7 @@ Edit `routes.json` to match your requirements.
 
 ### 2. Run the Application
 
-To start Chevron Router, run:
+To start ConduitGate, run:
 
 ```bash
 go run main.go
@@ -87,7 +116,7 @@ The server will start listening on the port specified in `routes.json` (default 
 
 ### 3. Sending Webhooks
 
-Chevron Router accepts `POST` requests at any of the paths defined in your `rules`.
+ConduitGate accepts `POST` requests at any of the paths defined in your `rules`.
 
 Example using `curl`:
 
@@ -97,7 +126,9 @@ curl -X POST http://localhost:8080/webhook-test \
      -d '{"event": "order.created", "data": {"id": 12345}}'
 ```
 
-The router will acknowledge receipt with an HTTP `202 Accepted` status and then asynchronously forward the payload to all configured destinations.
+The request is immediately acknowledged with HTTP `202 Accepted`, while delivery happens asynchronously.
+
+This ensures external services are never blocked by internal processing delays.
 
 ### 4. Running Tests
 
@@ -106,3 +137,8 @@ To run the unit tests:
 ```bash
 go test ./...
 ```
+## Philosophy
+
+ConduitGate treats webhooks as events, not HTTP requests.
+
+Instead of handling them directly, it routes them to systems designed to process them — queues, services, or other endpoints.
