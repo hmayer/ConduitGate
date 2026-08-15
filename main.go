@@ -3,14 +3,14 @@ package main
 import (
 	"log"
 
-	"chevron-router/internal/config"
-	"chevron-router/internal/forwarder"
-	"chevron-router/internal/listener"
-	"chevron-router/internal/router"
+	"conduitgate/internal/config"
+	"conduitgate/internal/forwarder"
+	"conduitgate/internal/listener"
+	"conduitgate/internal/router"
 )
 
 func main() {
-	log.Println("Initializing Chevron Router...")
+	log.Println("Initializing ConduitGate...")
 
 	cfg, err := config.LoadConfig("routes.json")
 	if err != nil {

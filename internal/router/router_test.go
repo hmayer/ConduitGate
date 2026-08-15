@@ -1,7 +1,7 @@
 package router
 
 import (
-	"chevron-router/internal/config"
+	"conduitgate/internal/config"
 	"testing"
 )
 

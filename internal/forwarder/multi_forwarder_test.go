@@ -1,7 +1,7 @@
 package forwarder
 
 import (
-	"chevron-router/internal/config"
+	"conduitgate/internal/config"
 	"context"
 	"errors"
 	"testing"
