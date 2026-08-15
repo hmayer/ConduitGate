@@ -1,10 +1,20 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
+
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY go.mod go.sum ./
+RUN go mod download
 
-COPY consumer.py .
+COPY . .
 
-CMD ["python", "consumer.py"]
+RUN CGO_ENABLED=0 GOOS=linux go build -o consumer .
+
+FROM gcr.io/distroless/static-debian12:nonroot
+
+WORKDIR /app
+
+COPY --from=builder /app/consumer /app/consumer
+
+ENTRYPOINT ["/app/consumer"]

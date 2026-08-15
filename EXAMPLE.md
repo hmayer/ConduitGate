@@ -6,7 +6,7 @@ This example runs the full ConduitGate flow end-to-end with Docker Compose: a we
 
 - **rabbitmq** — RabbitMQ broker with the management plugin enabled, pre-provisioned with the `webhook-exchange` topic exchange, the `webhook-events` queue, and the binding between them.
 - **conduitgate** — Built from the repository's `Dockerfile`, configured with `examples/rabbitmq/routes.json` to forward requests on `/webhook-test` to RabbitMQ.
-- **consumer** — A minimal Python service that connects to RabbitMQ, consumes messages from `webhook-events`, and prints each payload.
+- **consumer** — A minimal Go service that connects to RabbitMQ, consumes messages from `webhook-events`, and prints each payload.
 - **producer** — A one-shot `curl` container that sends a sample webhook to ConduitGate once it's reachable, so the flow runs automatically without a manual step.
 
 ## Files
@@ -20,8 +20,9 @@ examples/rabbitmq/
 │   └── definitions.json
 └── consumer/
     ├── Dockerfile
-    ├── requirements.txt
-    └── consumer.py
+    ├── go.mod
+    ├── go.sum
+    └── main.go
 ```
 
 ## 1. Run the Example
