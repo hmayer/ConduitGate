@@ -137,6 +137,33 @@ To run the unit tests:
 ```bash
 go test ./...
 ```
+
+## Docker
+
+ConduitGate ships an official multi-stage `Dockerfile` that builds a small, static binary and runs it in a minimal, non-root image.
+
+### 1. Build the Image
+
+```bash
+docker build -t conduitgate .
+```
+
+### 2. Run the Container
+
+The image bundles `routes.sample.json` as its default `routes.json`, so it starts out of the box:
+
+```bash
+docker run -p 8080:8080 conduitgate
+```
+
+To use your own configuration, mount it over the default at `/app/routes.json`:
+
+```bash
+docker run -p 8080:8080 -v $(pwd)/routes.json:/app/routes.json conduitgate
+```
+
+If your `routes.json` sets a different `"port"`, update the `-p` mapping (`-p <host-port>:<port>`) to match.
+
 ## Philosophy
 
 ConduitGate treats webhooks as events, not HTTP requests.
