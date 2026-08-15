@@ -130,7 +130,17 @@ The request is immediately acknowledged with HTTP `202 Accepted`, while delivery
 
 This ensures external services are never blocked by internal processing delays.
 
-### 4. Running Tests
+### 4. Health Check
+
+ConduitGate exposes a `GET /health` endpoint for monitoring and orchestration systems (e.g. load balancers, Kubernetes probes).
+
+```bash
+curl http://localhost:8080/health
+```
+
+It returns `200 OK` and has no external dependencies.
+
+### 5. Running Tests
 
 To run the unit tests:
 
