@@ -1,0 +1,16 @@
+{
+  "port": 8080,
+  "rules": [
+    {
+      "sourcePath": "/webhook-test",
+      "destinations": [
+        {
+          "protocol": "rabbitmq",
+          "url": "amqp://guest:guest@rabbitmq:5672/",
+          "exchange": "webhook-exchange",
+          "routingKey": "webhook.events"
+        }
+      ]
+    }
+  ]
+}

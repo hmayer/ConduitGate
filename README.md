@@ -164,6 +164,8 @@ docker run -p 8080:8080 -v $(pwd)/routes.json:/app/routes.json conduitgate
 
 If your `routes.json` sets a different `"port"`, update the `-p` mapping (`-p <host-port>:<port>`) to match.
 
+See [EXAMPLE.md](EXAMPLE.md) for a full RabbitMQ example using Docker Compose.
+
 ## Philosophy
 
 ConduitGate treats webhooks as events, not HTTP requests.
