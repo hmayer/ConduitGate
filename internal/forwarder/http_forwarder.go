@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"chevron-router/internal/config"
+	"conduitgate/internal/config"
 )
 
 type HTTPForwarder struct {

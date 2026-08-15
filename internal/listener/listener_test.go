@@ -2,8 +2,8 @@ package listener
 
 import (
 	"bytes"
-	"chevron-router/internal/config"
-	"chevron-router/internal/router"
+	"conduitgate/internal/config"
+	"conduitgate/internal/router"
 	"context"
 	"net/http"
 	"net/http/httptest"

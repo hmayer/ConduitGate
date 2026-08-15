@@ -1,7 +1,7 @@
 package forwarder
 
 import (
-	"chevron-router/internal/config"
+	"conduitgate/internal/config"
 	"context"
 	"net/http"
 	"net/http/httptest"

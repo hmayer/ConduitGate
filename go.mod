@@ -1,4 +1,4 @@
-module chevron-router
+module conduitgate
 
 go 1.26
 

@@ -1,9 +1,9 @@
 package listener
 
 import (
-	"chevron-router/internal/config"
-	"chevron-router/internal/forwarder"
-	"chevron-router/internal/router"
+	"conduitgate/internal/config"
+	"conduitgate/internal/forwarder"
+	"conduitgate/internal/router"
 	"context"
 	"fmt"
 	"io"

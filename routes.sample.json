@@ -23,14 +23,14 @@
         {
           "protocol": "sns",
           "region": "us-east-1",
-          "topicARN": "arn:aws:sns:us-east-1:0123456789:Chevron",
+          "topicARN": "arn:aws:sns:us-east-1:0123456789:ConduitGate",
           "accessKey": "YOUR_ACCESS_KEY_HERE",
           "secretKey": "YOUR_SECRET_KEY_HERE"
         },
         {
           "protocol": "sqs",
           "region": "us-east-1",
-          "queueURL": "https://sqs.us-east-1.amazonaws.com/0123456789/ChevronQueue",
+          "queueURL": "https://sqs.us-east-1.amazonaws.com/0123456789/ConduitGateQueue",
           "accessKey": "YOUR_ACCESS_KEY_HERE",
           "secretKey": "YOUR_SECRET_KEY_HERE"
         }

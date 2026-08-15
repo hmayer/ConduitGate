@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"chevron-router/internal/config"
-	"chevron-router/internal/forwarder"
-	"chevron-router/internal/listener"
-	"chevron-router/internal/router"
+	"conduitgate/internal/config"
+	"conduitgate/internal/forwarder"
+	"conduitgate/internal/listener"
+	"conduitgate/internal/router"
 )
 
 func TestIntegration(t *testing.T) {
-	// 1. Destination server (where Chevron will forward the webhook)
+	// 1. Destination server (where ConduitGate will forward the webhook)
 	receivedPayload := make(chan string, 1)
 	receivedAuth := make(chan string, 1)
 	receivedHeaders := make(chan http.Header, 1)
@@ -28,7 +28,7 @@ func TestIntegration(t *testing.T) {
 	}))
 	defer tsDestination.Close()
 
-	// 2. Chevron Setup
+	// 2. ConduitGate Setup
 	cfg := &config.Config{
 		Port: 8080,
 		Rules: []config.Rule{
@@ -54,15 +54,15 @@ func TestIntegration(t *testing.T) {
 	mf.Register("http", forwarder.NewHTTPForwarder())
 	l := listener.NewListener(cfg, r, mf)
 
-	// 3. Chevron Listener server
-	tsChevron := httptest.NewServer(http.HandlerFunc(l.HandleWebhook))
-	defer tsChevron.Close()
+	// 3. ConduitGate Listener server
+	tsConduitGate := httptest.NewServer(http.HandlerFunc(l.HandleWebhook))
+	defer tsConduitGate.Close()
 
-	// 4. Send a webhook to Chevron
+	// 4. Send a webhook to ConduitGate
 	payload := `{"event": "test", "data": 123}`
-	resp, err := http.Post(tsChevron.URL+"/incoming", "application/json", bytes.NewBufferString(payload))
+	resp, err := http.Post(tsConduitGate.URL+"/incoming", "application/json", bytes.NewBufferString(payload))
 	if err != nil {
-		t.Fatalf("Failed to send webhook to Chevron: %v", err)
+		t.Fatalf("Failed to send webhook to ConduitGate: %v", err)
 	}
 	if resp.StatusCode != http.StatusAccepted {
 		t.Errorf("Expected status 202, got %d", resp.StatusCode)
