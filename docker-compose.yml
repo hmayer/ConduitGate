@@ -1,0 +1,60 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./examples/rabbitmq/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./examples/rabbitmq/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  conduitgate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./examples/rabbitmq/routes.json:/app/routes.json:ro
+    ports:
+      - "8080:8080"
+
+  consumer:
+    build:
+      context: ./examples/rabbitmq/consumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/
+      EXCHANGE: webhook-exchange
+      QUEUE: webhook-events
+      ROUTING_KEY: webhook.events
+
+  producer:
+    image: curlimages/curl:latest
+    depends_on:
+      conduitgate:
+        condition: service_started
+    command:
+      - -sS
+      - -X
+      - POST
+      - http://conduitgate:8080/webhook-test
+      - -H
+      - "Content-Type: application/json"
+      - -d
+      - '{"event":"order.created","data":{"id":12345}}'
+      - --retry
+      - "10"
+      - --retry-connrefused
+      - --retry-delay
+      - "2"
