@@ -176,6 +176,25 @@ If your `routes.json` sets a different `"port"`, update the `-p` mapping (`-p <h
 
 See [EXAMPLE.md](EXAMPLE.md) for a full RabbitMQ example using Docker Compose.
 
+## Logging
+
+ConduitGate emits structured logs in JSON (one JSON object per line) to stdout, making them easy to ingest with log aggregators (e.g. Datadog, ELK, CloudWatch Logs, Loki).
+
+Each webhook delivery attempt is logged with:
+
+- `source_path` — the incoming webhook path that was matched
+- `destination` — the resolved destination (URL, exchange, queue, or topic depending on protocol)
+- `protocol` — the destination protocol (`http`, `amqp`, `sqs`, `sns`, ...)
+- `status` — `"success"` or `"failure"`
+- `duration_ms` — time taken to forward, in milliseconds
+- `error` — present only when `status` is `"failure"`
+
+Example line:
+
+```json
+{"time":"2026-08-15T10:00:00Z","level":"INFO","msg":"Webhook forwarded","source_path":"/stripe/payment_succeeded","destination":"https://sqs.us-east-1.amazonaws.com/123456789/PaymentSucceededQueue","protocol":"sqs","status":"success","duration_ms":42}
+```
+
 ## Philosophy
 
 ConduitGate treats webhooks as events, not HTTP requests.

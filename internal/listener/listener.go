@@ -7,8 +7,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
+	"time"
 )
 
 type Listener struct {
@@ -30,7 +31,7 @@ func (l *Listener) Start() error {
 	mux.HandleFunc("/health", l.HandleHealth)
 	mux.HandleFunc("/", l.HandleWebhook)
 
-	log.Printf("Starting listener on port %d...", l.port)
+	slog.Info("Starting listener", "port", l.port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", l.port), mux)
 }
 
@@ -48,20 +49,20 @@ func (l *Listener) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	destinations, err := l.router.Match(path)
 	if err != nil {
-		log.Printf("No route found for path %s: %v", path, err)
+		slog.Warn("No route found for webhook", "source_path", path, "status", "failure", "error", err.Error())
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
 
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("Failed to read body: %v", err)
+		slog.Error("Failed to read request body", "source_path", path, "status", "failure", "error", err.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
 
-	log.Printf("Routing webhook from %s to %d destinations", path, len(destinations))
+	slog.Info("Routing webhook", "source_path", path, "destination_count", len(destinations))
 
 	// Clone the payload as it might be necessary for async processing
 	payloadCopy := make([]byte, len(payload))
@@ -71,15 +72,46 @@ func (l *Listener) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 		destination := dest // capture loop variable
 		go func() {
 			// Use Background context for async forwarding to avoid it being canceled when the incoming request finishes
+			start := time.Now()
 			err := l.forwarder.Forward(context.Background(), payloadCopy, destination)
+			duration := time.Since(start).Milliseconds()
 			if err != nil {
-				log.Printf("Failed to forward webhook to %s (%s): %v", destination.URL, destination.Protocol, err)
+				slog.Error("Webhook forwarding failed",
+					"source_path", path,
+					"destination", destinationLabel(destination),
+					"protocol", destination.Protocol,
+					"status", "failure",
+					"duration_ms", duration,
+					"error", err.Error(),
+				)
 			} else {
-				log.Printf("Successfully forwarded webhook to %s (%s)", destination.URL, destination.Protocol)
+				slog.Info("Webhook forwarded",
+					"source_path", path,
+					"destination", destinationLabel(destination),
+					"protocol", destination.Protocol,
+					"status", "success",
+					"duration_ms", duration,
+				)
 			}
 		}()
 	}
 
 	w.WriteHeader(http.StatusAccepted)
 	fmt.Fprintln(w, "Webhook received and being processed")
+}
+
+func destinationLabel(d config.Destination) string {
+	switch d.Protocol {
+	case "amqp", "rabbitmq":
+		if d.Exchange != "" {
+			return d.Exchange
+		}
+		return d.URL
+	case "sqs":
+		return d.QueueURL
+	case "sns":
+		return d.TopicARN
+	default: // http, https
+		return d.URL
+	}
 }

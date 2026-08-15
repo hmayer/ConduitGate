@@ -4,7 +4,6 @@ import (
 	"conduitgate/internal/config"
 	"context"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -86,6 +85,5 @@ func (f *SNSForwarder) Forward(ctx context.Context, payload []byte, destination 
 		return fmt.Errorf("failed to publish to SNS: %w", err)
 	}
 
-	log.Printf("Successfully published to SNS Topic: %s", destination.TopicARN)
 	return nil
 }
