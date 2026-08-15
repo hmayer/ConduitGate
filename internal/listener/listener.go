@@ -27,10 +27,16 @@ func NewListener(cfg *config.Config, r *router.Router, f forwarder.Forwarder) *L
 
 func (l *Listener) Start() error {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", l.HandleHealth)
 	mux.HandleFunc("/", l.HandleWebhook)
 
 	log.Printf("Starting listener on port %d...", l.port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", l.port), mux)
+}
+
+func (l *Listener) HandleHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "OK")
 }
 
 func (l *Listener) HandleWebhook(w http.ResponseWriter, r *http.Request) {

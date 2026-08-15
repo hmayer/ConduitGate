@@ -120,6 +120,21 @@ func TestHandleWebhook(t *testing.T) {
 	})
 }
 
+func TestHandleHealth(t *testing.T) {
+	cfg := &config.Config{Port: 8080}
+	r := router.NewRouter(cfg)
+	mockF := &MockForwarder{}
+	l := NewListener(cfg, r, mockF)
+
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	w := httptest.NewRecorder()
+	l.HandleHealth(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
 type errorReader struct{}
 
 func (e *errorReader) Read(p []byte) (n int, err error) {
