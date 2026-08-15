@@ -4,7 +4,6 @@ import (
 	"conduitgate/internal/config"
 	"context"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -86,6 +85,5 @@ func (f *SQSForwarder) Forward(ctx context.Context, payload []byte, destination 
 		return fmt.Errorf("failed to send message to SQS: %w", err)
 	}
 
-	log.Printf("Successfully sent message to SQS Queue: %s", destination.QueueURL)
 	return nil
 }

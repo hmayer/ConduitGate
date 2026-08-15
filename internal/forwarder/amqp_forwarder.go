@@ -4,7 +4,6 @@ import (
 	"conduitgate/internal/config"
 	"context"
 	"fmt"
-	"log"
 	"sync"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -94,6 +93,5 @@ func (f *AMQPForwarder) Forward(ctx context.Context, payload []byte, destination
 		return fmt.Errorf("failed to publish a message: %w", err)
 	}
 
-	log.Printf("Message published to AMQP exchange: %s", destination.Exchange)
 	return nil
 }

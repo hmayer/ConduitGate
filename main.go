@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"log/slog"
+	"os"
 
 	"conduitgate/internal/config"
 	"conduitgate/internal/forwarder"
@@ -10,11 +11,14 @@ import (
 )
 
 func main() {
-	log.Println("Initializing ConduitGate...")
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
+	slog.Info("Initializing ConduitGate...")
 
 	cfg, err := config.LoadConfig("routes.json")
 	if err != nil {
-		log.Fatalf("Failed to load config from routes.json: %v", err)
+		slog.Error("Failed to load config", "path", "routes.json", "error", err.Error())
+		os.Exit(1)
 	}
 	r := router.NewRouter(cfg)
 
@@ -29,6 +33,7 @@ func main() {
 	l := listener.NewListener(cfg, r, mf)
 
 	if err := l.Start(); err != nil {
-		log.Fatalf("Listener failed: %v", err)
+		slog.Error("Listener failed", "error", err.Error())
+		os.Exit(1)
 	}
 }
